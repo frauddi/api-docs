@@ -205,6 +205,11 @@ jobs:
         .tocify-wrapper > .search input { background: #16B798; border-color: #128a75; }
         .tocify-wrapper .tocify-item.active > .tocify-link { background-color: #16B798; color: white; }
         .highlight { background-color: #f0fffe; border-left: 4px solid #16B798; }
+        .toc-wrapper .logo {
+          display: block;
+          max-width: 90%;
+          margin: 10px;
+        }
         EOF
         
     - name: Build and deploy
