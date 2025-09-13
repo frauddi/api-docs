@@ -190,6 +190,45 @@ jobs:
         - `internal_server_error` - Server-side error
         EOF
         
+    - name: Add custom Frauddi logo and styles
+      run: |
+        # Create images directory
+        mkdir -p source/images
+        
+        # Download Frauddi logo (or use a placeholder)
+        curl -L "https://frauddi.com/logo.png" -o source/images/logo.png || echo "Logo not found, using default"
+        
+        # Add custom CSS for Frauddi branding
+        cat >> source/stylesheets/screen.css.scss << 'EOF'
+        
+        // Frauddi custom styles
+        .tocify-wrapper {
+          .logo {
+            background-image: url('../images/logo.png');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            height: 60px;
+            margin: 20px auto;
+            width: 150px;
+          }
+        }
+        
+        // Frauddi brand colors
+        .tocify-wrapper > .search {
+          background: linear-gradient(to bottom, #6366F1, #4F46E5);
+        }
+        
+        h1, h2 {
+          color: #1F2937;
+        }
+        
+        .highlight {
+          background-color: #F8FAFC;
+        }
+        
+        EOF
+        
     - name: Install Slate dependencies
       run: bundle install
       
@@ -201,13 +240,15 @@ jobs:
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_dir: ./build
+        force_orphan: true
         
-    - name: Commit source changes
+    - name: Commit source changes back to main
       run: |
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
-        git add source/
-        git diff --staged --quiet || git commit -m "Auto-update API documentation from OpenAPI spec"
-        git push
+        git add source/ || true
+        git add openapi.json || true
+        git diff --staged --quiet || git commit -m "Auto-update API documentation from OpenAPI spec [skip ci]"
+        git push || true
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
