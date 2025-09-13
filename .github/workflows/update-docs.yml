@@ -52,7 +52,7 @@ jobs:
           - python: Python
         toc_footers:
           - <a href='https://frauddi.com'>Back to Frauddi</a>
-          - <a href='mailto:support@frauddi.com'>Support</a>
+          - <a href='mailto:elio@frauddi.com'>Support</a>
         includes:
           - errors
         search: true
@@ -216,6 +216,9 @@ jobs:
       run: |
         bundle install
         bundle exec middleman build --clean
+
+        # Add CNAME file for custom domain
+        echo "docs.frauddi.com" > build/CNAME
         
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v3
@@ -223,6 +226,7 @@ jobs:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_dir: ./build
         force_orphan: true
+        cname: docs.frauddi.com
         
     - name: Commit changes
       run: |
