@@ -635,3 +635,30 @@ html, body {
 .copy-clipboard:hover {
   opacity: 0.8;
 }
+
+// Frauddi custom styles
+.tocify-wrapper {
+  .logo {
+    background-image: url('../images/logo.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    height: 60px;
+    margin: 20px auto;
+    width: 150px;
+  }
+}
+
+// Frauddi brand colors
+.tocify-wrapper > .search {
+  background: linear-gradient(to bottom, #6366F1, #4F46E5);
+}
+
+h1, h2 {
+  color: #1F2937;
+}
+
+.highlight {
+  background-color: #F8FAFC;
+}
+
