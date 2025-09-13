@@ -1,14 +1,9 @@
 name: Update API Documentation
 
 on:
-  # Run every 6 hours
   schedule:
     - cron: '0 */6 * * *'
-  
-  # Allow manual execution
   workflow_dispatch:
-  
-  # Run when push to main
   push:
     branches: [ main ]
 
@@ -34,49 +29,38 @@ jobs:
     - name: Install widdershins
       run: npm install -g widdershins
       
-    - name: Download OpenAPI spec
+    - name: Download and process OpenAPI spec
       run: |
         curl -o openapi.json https://api.frauddi.com/openapi.json
-        
-    - name: Convert OpenAPI to Markdown
-      run: |
         widdershins openapi.json \
           --language_tabs 'shell:cURL' 'javascript:JavaScript' 'python:Python' \
-          --summary \
-          --code \
-          --httpsnippet \
-          --theme darkula \
-          --search false \
+          --summary --code --httpsnippet --theme darkula --search false \
           -o temp_docs.md
-          
-    - name: Create Slate-formatted documentation
+        
+        # Fix FastAPI references
+        sed -i 's/FastAPI v0\.1\.0/Frauddi API v1.0/g' temp_docs.md
+        sed -i 's/FastAPI/Frauddi API/g' temp_docs.md
+        
+    - name: Create clean documentation
       run: |
         cat > source/index.html.md << 'EOF'
         ---
         title: Frauddi API Reference
-        
         language_tabs:
           - shell: cURL
           - javascript: JavaScript  
           - python: Python
-        
         toc_footers:
           - <a href='https://frauddi.com'>Back to Frauddi</a>
           - <a href='mailto:support@frauddi.com'>Support</a>
-          - <a href='https://github.com/frauddi/api-docs'>Documentation Source</a>
-        
         includes:
           - errors
-        
         search: true
-        
         code_clipboard: true
-        
         logo: logo.png
-        
         meta:
           - name: description
-            content: Official API documentation for Frauddi - Advanced fraud detection and prevention platform
+            content: Official API documentation for Frauddi
         ---
         
         # Frauddi API
@@ -142,10 +126,10 @@ jobs:
         
         EOF
         
-        # Append converted OpenAPI content (skip the header and fix FastAPI references)
-        sed 's/FastAPI v0\.1\.0/Frauddi API v1.0/g; s/FastAPI/Frauddi API/g' temp_docs.md | tail -n +20 >> source/index.html.md
+        # Append API endpoints
+        tail -n +20 temp_docs.md >> source/index.html.md
         
-    - name: Create errors include file
+    - name: Create errors file
       run: |
         mkdir -p source/includes
         cat > source/includes/_errors.md << 'EOF'
@@ -192,89 +176,38 @@ jobs:
         - `internal_server_error` - Server-side error
         EOF
         
-    - name: Add custom Frauddi logo and styles
+    - name: Add branding
       run: |
-        # Create images directory
         mkdir -p source/images
-        
-        # Download Frauddi logo from the correct URL
         curl -L "https://3l1070r.wordpress.com/wp-content/uploads/2025/09/logo.png" -o source/images/logo.png
         
-        # Add custom CSS for Frauddi branding
         cat >> source/stylesheets/screen.css.scss << 'EOF'
-        
-        // Frauddi custom styles with brand color #16B798
-        .tocify-wrapper {
-          .logo {
-            background-image: url('../images/logo.png');
-            background-size: contain;
-            background-repeat: no-repeat;
-            background-position: center;
-            height: 40px;
-            margin: 15px auto 25px auto;
-            width: 120px;
-            padding: 5px;
-          }
+        .tocify-wrapper .logo {
+          background-image: url('../images/logo.png');
+          background-size: contain;
+          background-repeat: no-repeat;
+          background-position: center;
+          height: 40px;
+          margin: 15px auto 25px auto;
+          width: 120px;
+          padding: 5px;
         }
-        
-        // Hide the placeholder text
-        .tocify-wrapper .logo-placeholder {
-          display: none !important;
-        }
-        
-        // Frauddi brand colors - turquoise gradient
-        .tocify-wrapper > .search {
-          background: linear-gradient(to bottom, #16B798, #128a75);
-        }
-        
-        .tocify-wrapper > .search input {
-          background: #16B798;
-          border-color: #128a75;
-        }
-        
-        // Headers with Frauddi color
-        h1 {
-          color: #16B798;
-          border-bottom: 2px solid #16B798;
-        }
-        
-        h2 {
-          color: #128a75;
-        }
-        
-        // Links and accents
-        a {
-          color: #16B798;
-        }
-        
-        a:hover {
-          color: #128a75;
-        }
-        
-        // Code highlighting with Frauddi accent
-        .highlight {
-          background-color: #f0fffe;
-          border-left: 4px solid #16B798;
-        }
-        
-        // Sidebar active item
-        .tocify-wrapper .tocify-item.active > .tocify-link {
-          background-color: #16B798;
-          color: white;
-        }
-        
+        .tocify-wrapper .logo-placeholder { display: none !important; }
+        h1 { color: #16B798; border-bottom: 2px solid #16B798; }
+        h2 { color: #128a75; }
+        a { color: #16B798; }
+        a:hover { color: #128a75; }
+        .tocify-wrapper > .search { background: linear-gradient(to bottom, #16B798, #128a75); }
+        .tocify-wrapper > .search input { background: #16B798; border-color: #128a75; }
+        .tocify-wrapper .tocify-item.active > .tocify-link { background-color: #16B798; color: white; }
+        .highlight { background-color: #f0fffe; border-left: 4px solid #16B798; }
         EOF
         
-        # Replace FastAPI references with Frauddi
-        sed -i 's/FastAPI v0\.1\.0/Frauddi API v1.0/g' temp_docs.md || true
-        sed -i 's/FastAPI/Frauddi API/g' temp_docs.md || true
+    - name: Build and deploy
+      run: |
+        bundle install
+        bundle exec middleman build --clean
         
-    - name: Install Slate dependencies
-      run: bundle install
-      
-    - name: Build Slate documentation
-      run: bundle exec middleman build --clean
-      
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v3
       with:
@@ -282,17 +215,12 @@ jobs:
         publish_dir: ./build
         force_orphan: true
         
-    - name: Commit source changes back to main
+    - name: Commit changes
       run: |
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
-        git add source/ || true
-        git add openapi.json || true
-        if ! git diff --staged --quiet; then
-          git commit -m "Auto-update API documentation from OpenAPI spec [skip ci]"
-          git push || echo "Push failed, but continuing..."
-        else
-          echo "No changes to commit"
-        fi
+        git add -A
+        git diff --staged --quiet || git commit -m "Auto-update API docs [skip ci]"
+        git push || echo "Push failed"
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
