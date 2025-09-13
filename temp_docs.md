@@ -1,69 +1,22 @@
 ---
-title: Frauddi API Reference
-
+title: FastAPI v0.1.0
 language_tabs:
   - shell: cURL
-  - javascript: JavaScript  
+  - javascript: JavaScript
   - python: Python
+language_clients:
+  - shell: ""
+  - javascript: ""
+  - python: ""
+toc_footers: []
+includes: []
+search: false
+highlight_theme: darkula
+headingLevel: 2
 
-toc_footers:
-  - <a href='https://frauddi.com'>Back to Frauddi</a>
-  - <a href='mailto:support@frauddi.com'>Support</a>
-  - <a href='https://github.com/frauddi/api-docs'>Documentation Source</a>
-
-includes:
-  - errors
-
-search: true
-
-code_clipboard: true
-
-meta:
-  - name: description
-    content: Official API documentation for Frauddi - Advanced fraud detection and prevention platform
 ---
 
-# Frauddi API
-
-Welcome to the **Frauddi API**! Our API allows you to integrate advanced fraud detection and prevention capabilities into your applications.
-
-We provide endpoints for fraud assessments, rule management, and comprehensive analytics to help protect your business from fraudulent activities.
-
-Base URL: `https://api.frauddi.com`
-
-## Authentication
-
-> To authorize, use this code:
-
-```shell
-curl "https://api.frauddi.com/api/v0/endpoint" \
-  -H "Authorization: Bearer YOUR_API_KEY"
-```
-
-```javascript
-const frauddi = require('frauddi-sdk');
-
-const client = new frauddi.Client({
-  apiKey: 'YOUR_API_KEY'
-});
-```
-
-```python
-import frauddi
-
-client = frauddi.Client(api_key='YOUR_API_KEY')
-```
-
-Frauddi uses API keys to authenticate requests. You can generate API keys from your Frauddi dashboard.
-
-The API expects your key to be included in all requests in the Authorization header:
-
-`Authorization: Bearer YOUR_API_KEY`
-
-<aside class="notice">
-Make sure to replace <code>YOUR_API_KEY</code> with your actual API key.
-</aside>
-
+<!-- Generator: Widdershins v4.0.1 -->
 
 <h1 id="fastapi">FastAPI v0.1.0</h1>
 

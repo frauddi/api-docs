@@ -1,22 +1,37 @@
 # Errors
 
-<aside class="notice">
-This error section is stored in a separate file in <code>includes/_errors.md</code>. Slate allows you to optionally separate out your docs into many files...just save them to the <code>includes</code> folder and add them to the top of your <code>index.md</code>'s frontmatter. Files are included in the order listed.
-</aside>
-
-The Kittn API uses the following error codes:
-
+The Frauddi API uses conventional HTTP response codes to indicate the success or failure of an API request.
 
 Error Code | Meaning
 ---------- | -------
-400 | Bad Request -- Your request is invalid.
-401 | Unauthorized -- Your API key is wrong.
-403 | Forbidden -- The kitten requested is hidden for administrators only.
-404 | Not Found -- The specified kitten could not be found.
-405 | Method Not Allowed -- You tried to access a kitten with an invalid method.
-406 | Not Acceptable -- You requested a format that isn't json.
-410 | Gone -- The kitten requested has been removed from our servers.
-418 | I'm a teapot.
-429 | Too Many Requests -- You're requesting too many kittens! Slow down!
-500 | Internal Server Error -- We had a problem with our server. Try again later.
-503 | Service Unavailable -- We're temporarily offline for maintenance. Please try again later.
+400 | Bad Request -- Your request is invalid
+401 | Unauthorized -- Your API key is wrong
+403 | Forbidden -- Access denied
+404 | Not Found -- The specified resource could not be found
+422 | Unprocessable Entity -- Validation error
+429 | Too Many Requests -- You're making too many requests
+500 | Internal Server Error -- We had a problem with our server
+503 | Service Unavailable -- We're temporarily offline for maintenance
+
+## Error Response Format
+
+```json
+{
+  "error": {
+    "type": "validation_error",
+    "message": "The request parameters are invalid",
+    "details": [
+      {
+        "field": "email",
+        "message": "Invalid email format"
+      }
+    ]
+  }
+}
+```
+
+All errors return a JSON object with an `error` field containing:
+
+- **type**: The category of error
+- **message**: Human-readable error message  
+- **details**: Array of specific validation errors (when applicable)
