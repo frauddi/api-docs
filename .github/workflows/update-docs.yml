@@ -207,8 +207,8 @@ jobs:
         .highlight { background-color: #f0fffe; border-left: 4px solid #16B798; }
         .toc-wrapper .logo {
           display: block;
-          max-width: 90%;
-          margin: 10px;
+          max-width: 90% !important;
+          margin: 10px !important;
         }
         EOF
         
