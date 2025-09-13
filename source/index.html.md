@@ -6,7 +6,7 @@ language_tabs:
   - python: Python
 toc_footers:
   - <a href='https://frauddi.com'>Back to Frauddi</a>
-  - <a href='mailto:support@frauddi.com'>Support</a>
+  - <a href='mailto:elio@frauddi.com'>Support</a>
 includes:
   - errors
 search: true
