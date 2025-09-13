@@ -41,17 +41,37 @@ curl "https://api.frauddi.com/api/v0/endpoint" \
 ```
 
 ```javascript
-const frauddi = require('frauddi-sdk');
-
-const client = new frauddi.Client({
-  apiKey: 'YOUR_API_KEY'
+const response = await fetch('https://api.frauddi.com/api/v0/endpoint', {
+  method: 'POST',
+  headers: {
+    'Authorization': 'Bearer YOUR_API_KEY',
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    // request data
+  })
 });
+const data = await response.json();
 ```
 
 ```python
-import frauddi
+import requests
 
-client = frauddi.Client(api_key='YOUR_API_KEY')
+headers = {
+    'Authorization': 'Bearer YOUR_API_KEY',
+    'Content-Type': 'application/json'
+}
+
+data = {
+    # request data
+}
+
+response = requests.post(
+    'https://api.frauddi.com/api/v0/endpoint',
+    headers=headers,
+    json=data
+)
+result = response.json()
 ```
 
 Frauddi uses API keys to authenticate requests. You can generate API keys from your Frauddi dashboard.
