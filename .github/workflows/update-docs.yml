@@ -187,8 +187,12 @@ jobs:
           background-size: contain;
           background-repeat: no-repeat;
           background-position: center;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          max-width: 80%;
+          margin: 10px;
           height: 40px;
-          margin: 15px auto 25px auto;
           width: 120px;
           padding: 5px;
         }
