@@ -1,28 +1,20 @@
 ---
 title: Frauddi API Reference
-
 language_tabs:
   - shell: cURL
   - javascript: JavaScript  
   - python: Python
-
 toc_footers:
   - <a href='https://frauddi.com'>Back to Frauddi</a>
   - <a href='mailto:support@frauddi.com'>Support</a>
-  - <a href='https://github.com/frauddi/api-docs'>Documentation Source</a>
-
 includes:
   - errors
-
 search: true
-
 code_clipboard: true
-
 logo: logo.png
-
 meta:
   - name: description
-    content: Official API documentation for Frauddi - Advanced fraud detection and prevention platform
+    content: Official API documentation for Frauddi
 ---
 
 # Frauddi API
