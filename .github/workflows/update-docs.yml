@@ -1,14 +1,14 @@
 name: Update API Documentation
 
 on:
-  # Ejecutar cada 6 horas
+  # Run every 6 hours
   schedule:
     - cron: '0 */6 * * *'
   
-  # También permitir ejecución manual
+  # Allow manual execution
   workflow_dispatch:
   
-  # Y ejecutar cuando se haga push a main
+  # Run when push to main
   push:
     branches: [ main ]
 
@@ -24,6 +24,12 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: '18'
+        
+    - name: Setup Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: '3.1'
+        bundler-cache: true
         
     - name: Install widdershins
       run: npm install -g widdershins
@@ -89,17 +95,37 @@ jobs:
         ```
         
         ```javascript
-        const frauddi = require('frauddi-sdk');
-        
-        const client = new frauddi.Client({
-          apiKey: 'YOUR_API_KEY'
+        const response = await fetch('https://api.frauddi.com/api/v0/endpoint', {
+          method: 'POST',
+          headers: {
+            'Authorization': 'Bearer YOUR_API_KEY',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            // request data
+          })
         });
+        const data = await response.json();
         ```
         
         ```python
-        import frauddi
+        import requests
         
-        client = frauddi.Client(api_key='YOUR_API_KEY')
+        headers = {
+            'Authorization': 'Bearer YOUR_API_KEY',
+            'Content-Type': 'application/json'
+        }
+        
+        data = {
+            # request data
+        }
+        
+        response = requests.post(
+            'https://api.frauddi.com/api/v0/endpoint',
+            headers=headers,
+            json=data
+        )
+        result = response.json()
         ```
         
         Frauddi uses API keys to authenticate requests. You can generate API keys from your Frauddi dashboard.
@@ -127,50 +153,61 @@ jobs:
         
         Error Code | Meaning
         ---------- | -------
-        400 | Bad Request -- Your request is invalid
-        401 | Unauthorized -- Your API key is wrong
-        403 | Forbidden -- Access denied
-        404 | Not Found -- The specified resource could not be found
-        422 | Unprocessable Entity -- Validation error
-        429 | Too Many Requests -- You're making too many requests
-        500 | Internal Server Error -- We had a problem with our server
-        503 | Service Unavailable -- We're temporarily offline for maintenance
+        400 | Bad Request -- The request was invalid or cannot be served
+        401 | Unauthorized -- Authentication is required to access this resource
+        403 | Forbidden -- You do not have permission to access this resource
+        404 | Not Found -- The requested resource could not be found
+        409 | Conflict -- The request conflicts with the current state of the resource
+        422 | Unprocessable Entity -- Validation errors in the request data
+        500 | Internal Server Error -- An unexpected error occurred on the server
         
         ## Error Response Format
         
         ```json
         {
           "error": {
-            "type": "validation_error",
-            "message": "The request parameters are invalid",
-            "details": [
-              {
-                "field": "email",
-                "message": "Invalid email format"
-              }
-            ]
+            "type": "bad_request_error",
+            "message": "The request was invalid or cannot be served.",
+            "status_code": 400
           }
         }
         ```
         
         All errors return a JSON object with an `error` field containing:
         
-        - **type**: The category of error
-        - **message**: Human-readable error message  
-        - **details**: Array of specific validation errors (when applicable)
+        - **type**: The specific error type (e.g., "unauthorized_error", "validation_error")
+        - **message**: Human-readable error message
+        - **status_code**: HTTP status code
+        
+        ## Error Types
+        
+        - `bad_request_error` - Invalid request format or parameters
+        - `unauthorized_error` - Missing or invalid API key
+        - `forbidden_error` - Insufficient permissions
+        - `not_found_error` - Resource does not exist
+        - `conflict_error` - Request conflicts with current state
+        - `unprocessable_entity_error` - Validation failed
+        - `internal_server_error` - Server-side error
         EOF
         
-    - name: Commit and push changes
+    - name: Install Slate dependencies
+      run: bundle install
+      
+    - name: Build Slate documentation
+      run: bundle exec middleman build --clean
+      
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./build
+        
+    - name: Commit source changes
       run: |
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
-        git add .
+        git add source/
         git diff --staged --quiet || git commit -m "Auto-update API documentation from OpenAPI spec"
         git push
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        
-    - name: Trigger GitHub Pages rebuild
-      run: |
-        echo "Documentation updated successfully!"
-        echo "Changes will be live at https://docs.frauddi.com in a few minutes"
