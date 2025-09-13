@@ -41,7 +41,6 @@ jobs:
           --httpsnippet \
           --theme darkula \
           --search false \
-          --loadschema \
           -o temp_docs.md
           
     - name: Create Slate-formatted documentation
