@@ -1,7 +1,7 @@
 # Frauddi API Documentation
 
 <p align="center">
-  <img src="[https://frauddi.com/logo.png](https://3l1070r.wordpress.com/wp-content/uploads/2025/09/logo.png)" alt="Frauddi API" width="150">
+  <img src="static/logo/logo.png" alt="frauddi Logo">
   <br>
   <a href="https://docs.frauddi.com"><img src="https://img.shields.io/badge/docs-live-brightgreen" alt="Documentation"></a>
   <a href="https://api.frauddi.com"><img src="https://img.shields.io/badge/API-production-blue" alt="API Status"></a>
