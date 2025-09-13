@@ -33,27 +33,6 @@ Base URL: `https://api.frauddi.com`
 
 ## Authentication
 
-> To authorize, use this code:
-
-```shell
-curl "https://api.frauddi.com/api/v0/endpoint" \
-  -H "Authorization: Bearer YOUR_API_KEY"
-```
-
-```javascript
-const frauddi = require('frauddi-sdk');
-
-const client = new frauddi.Client({
-  apiKey: 'YOUR_API_KEY'
-});
-```
-
-```python
-import frauddi
-
-client = frauddi.Client(api_key='YOUR_API_KEY')
-```
-
 Frauddi uses API keys to authenticate requests. You can generate API keys from your Frauddi dashboard.
 
 The API expects your key to be included in all requests in the Authorization header:
