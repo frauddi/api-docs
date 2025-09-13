@@ -1,0 +1,177 @@
+name: Update API Documentation
+
+on:
+  # Ejecutar cada 6 horas
+  schedule:
+    - cron: '0 */6 * * *'
+  
+  # También permitir ejecución manual
+  workflow_dispatch:
+  
+  # Y ejecutar cuando se haga push a main
+  push:
+    branches: [ main ]
+
+jobs:
+  update-docs:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        
+    - name: Install widdershins
+      run: npm install -g widdershins
+      
+    - name: Download OpenAPI spec
+      run: |
+        curl -o openapi.json https://api.frauddi.com/openapi.json
+        
+    - name: Convert OpenAPI to Markdown
+      run: |
+        widdershins openapi.json \
+          --language_tabs 'shell:cURL' 'javascript:JavaScript' 'python:Python' \
+          --summary \
+          --code \
+          --httpsnippet \
+          --theme darkula \
+          --search false \
+          --loadschema \
+          -o temp_docs.md
+          
+    - name: Create Slate-formatted documentation
+      run: |
+        cat > source/index.html.md << 'EOF'
+        ---
+        title: Frauddi API Reference
+        
+        language_tabs:
+          - shell: cURL
+          - javascript: JavaScript  
+          - python: Python
+        
+        toc_footers:
+          - <a href='https://frauddi.com'>Back to Frauddi</a>
+          - <a href='mailto:support@frauddi.com'>Support</a>
+          - <a href='https://github.com/frauddi/api-docs'>Documentation Source</a>
+        
+        includes:
+          - errors
+        
+        search: true
+        
+        code_clipboard: true
+        
+        meta:
+          - name: description
+            content: Official API documentation for Frauddi - Advanced fraud detection and prevention platform
+        ---
+        
+        # Frauddi API
+        
+        Welcome to the **Frauddi API**! Our API allows you to integrate advanced fraud detection and prevention capabilities into your applications.
+        
+        We provide endpoints for fraud assessments, rule management, and comprehensive analytics to help protect your business from fraudulent activities.
+        
+        Base URL: `https://api.frauddi.com`
+        
+        ## Authentication
+        
+        > To authorize, use this code:
+        
+        ```shell
+        curl "https://api.frauddi.com/api/v0/endpoint" \
+          -H "Authorization: Bearer YOUR_API_KEY"
+        ```
+        
+        ```javascript
+        const frauddi = require('frauddi-sdk');
+        
+        const client = new frauddi.Client({
+          apiKey: 'YOUR_API_KEY'
+        });
+        ```
+        
+        ```python
+        import frauddi
+        
+        client = frauddi.Client(api_key='YOUR_API_KEY')
+        ```
+        
+        Frauddi uses API keys to authenticate requests. You can generate API keys from your Frauddi dashboard.
+        
+        The API expects your key to be included in all requests in the Authorization header:
+        
+        `Authorization: Bearer YOUR_API_KEY`
+        
+        <aside class="notice">
+        Make sure to replace <code>YOUR_API_KEY</code> with your actual API key.
+        </aside>
+        
+        EOF
+        
+        # Append converted OpenAPI content (skip the header)
+        tail -n +20 temp_docs.md >> source/index.html.md
+        
+    - name: Create errors include file
+      run: |
+        mkdir -p source/includes
+        cat > source/includes/_errors.md << 'EOF'
+        # Errors
+        
+        The Frauddi API uses conventional HTTP response codes to indicate the success or failure of an API request.
+        
+        Error Code | Meaning
+        ---------- | -------
+        400 | Bad Request -- Your request is invalid
+        401 | Unauthorized -- Your API key is wrong
+        403 | Forbidden -- Access denied
+        404 | Not Found -- The specified resource could not be found
+        422 | Unprocessable Entity -- Validation error
+        429 | Too Many Requests -- You're making too many requests
+        500 | Internal Server Error -- We had a problem with our server
+        503 | Service Unavailable -- We're temporarily offline for maintenance
+        
+        ## Error Response Format
+        
+        ```json
+        {
+          "error": {
+            "type": "validation_error",
+            "message": "The request parameters are invalid",
+            "details": [
+              {
+                "field": "email",
+                "message": "Invalid email format"
+              }
+            ]
+          }
+        }
+        ```
+        
+        All errors return a JSON object with an `error` field containing:
+        
+        - **type**: The category of error
+        - **message**: Human-readable error message  
+        - **details**: Array of specific validation errors (when applicable)
+        EOF
+        
+    - name: Commit and push changes
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add .
+        git diff --staged --quiet || git commit -m "Auto-update API documentation from OpenAPI spec"
+        git push
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        
+    - name: Trigger GitHub Pages rebuild
+      run: |
+        echo "Documentation updated successfully!"
+        echo "Changes will be live at https://docs.frauddi.com in a few minutes"
