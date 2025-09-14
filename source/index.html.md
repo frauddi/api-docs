@@ -6,7 +6,7 @@ language_tabs:
   - python: Python
 toc_footers:
   - <a href='https://frauddi.com'>Back to Frauddi</a>
-  - <a href='mailto:elio@frauddi.com'>Support</a>
+  - <a href='mailto:support@frauddi.com'>Support</a>
 includes:
   - errors
 search: true
@@ -14,16 +14,16 @@ code_clipboard: true
 logo: logo.png
 meta:
   - name: description
-    content: Official API documentation for Frauddi
+    content: Official REST API documentation for Frauddi fraud detection platform
 ---
 
 # Frauddi API
 
-Welcome to the **Frauddi API**! Our API allows you to integrate advanced fraud detection and prevention capabilities into your applications.
+The Frauddi API is organized around REST with predictable resource-oriented URLs, JSON-encoded request bodies, and standard HTTP response codes.
 
-We provide endpoints for fraud assessments, rule management, and comprehensive analytics to help protect your business from fraudulent activities.
+Our API provides programmatic access to fraud detection, rule management, entity relationship mapping, and operational analytics.
 
-Base URL: `https://api.frauddi.com`
+**Base URL:** `https://api.frauddi.com`
 
 ## Authentication
 
@@ -68,15 +68,26 @@ response = requests.post(
 result = response.json()
 ```
 
-Frauddi uses API keys to authenticate requests. You can generate API keys from your Frauddi dashboard.
+All API requests require authentication using your API key in the Authorization header.
 
-The API expects your key to be included in all requests in the Authorization header:
+Contact our sales team or access your Frauddi dashboard to obtain your API key.
 
 `Authorization: Bearer YOUR_API_KEY`
 
 <aside class="notice">
 Make sure to replace <code>YOUR_API_KEY</code> with your actual API key.
 </aside>
+
+## Getting Started
+
+1. Obtain your API key from our sales team or dashboard
+2. Make a test request to the `/ping` endpoint  
+3. Submit transaction data to `/assessments/` endpoints
+4. Configure detection rules via `/rules/` endpoints
+
+## Response Format
+
+All API responses use standard HTTP status codes and return JSON-encoded data with consistent error handling.
 
 
 <h1 id="fastapi">Frauddi API v1.0</h1>
