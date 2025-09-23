@@ -4139,7 +4139,7 @@ anyOf
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» *anonymous*|[PydanticObjectId](#schemapydanticobjectid)|false|none|none|
+|» *anonymous*|string|false|none|none|
 
 or
 
@@ -6556,24 +6556,6 @@ PaymentResponse
 |bin_number|string|true|none|none|
 |cvc|string|true|none|none|
 
-<h2 id="tocS_PydanticObjectId">PydanticObjectId</h2>
-<!-- backwards compatibility -->
-<a id="schemapydanticobjectid"></a>
-<a id="schema_PydanticObjectId"></a>
-<a id="tocSpydanticobjectid"></a>
-<a id="tocspydanticobjectid"></a>
-
-```json
-"5eb7cf5a86d9755df3a6c593"
-
-```
-
-### Properties
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|*anonymous*|string|false|none|none|
-
 <h2 id="tocS_RingStatsResponse">RingStatsResponse</h2>
 <!-- backwards compatibility -->
 <a id="schemaringstatsresponse"></a>
@@ -6850,7 +6832,7 @@ anyOf
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» *anonymous*|[PydanticObjectId](#schemapydanticobjectid)|false|none|none|
+|» *anonymous*|string|false|none|none|
 
 or
 
@@ -7180,7 +7162,7 @@ anyOf
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» *anonymous*|[PydanticObjectId](#schemapydanticobjectid)|false|none|none|
+|» *anonymous*|string|false|none|none|
 
 or
 
