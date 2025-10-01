@@ -3150,3 +3150,31 @@ a:hover { color: #128a75; }
   max-width: 90% !important;
   margin: 10px !important;
 }
+.tocify-wrapper .logo {
+  background-image: url('../images/logo.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  max-width: 80%;
+  margin: 10px;
+  height: 40px;
+  width: 120px;
+  padding: 5px;
+}
+.tocify-wrapper .logo-placeholder { display: none !important; }
+h1 { color: #16B798; border-bottom: 2px solid #16B798; }
+h2 { color: #128a75; }
+a { color: #16B798; }
+a:hover { color: #128a75; }
+.tocify-wrapper > .search { background: linear-gradient(to bottom, #16B798, #128a75); }
+.tocify-wrapper > .search input { background: #16B798; border-color: #128a75; }
+.tocify-wrapper .tocify-item.active > .tocify-link { background-color: #16B798; color: white; }
+.highlight { background-color: #f0fffe; border-left: 4px solid #16B798; }
+.toc-wrapper .logo {
+  display: block;
+  max-width: 90% !important;
+  margin: 10px !important;
+}
