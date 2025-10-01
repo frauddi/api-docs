@@ -1375,22 +1375,59 @@ HTTPBearer
 
 <h1 id="frauddi-api-analytics">Analytics</h1>
 
-## Create Analytics Aggregation
+## Create Custom Aggregation
 
 <a id="opIdadd_aggregation_api_v1_aggregations__post"></a>
 
 `POST /api/v1/aggregations/`
 
-Create a new data aggregation rule for analytics and pattern detection.
+Create a custom aggregation to track specific metrics based on conditions.
 
-    Aggregations allow you to:
-    - **Monitor transaction patterns** - Track volume, velocity, and behavior over time
-    - **Set detection thresholds** - Define limits for suspicious activity
-    - **Analyze customer behavior** - Aggregate data by customer, location, or device
-    - **Create custom metrics** - Build business-specific fraud indicators
-    - **Real-time monitoring** - Continuous evaluation of aggregated data
+    **What are Custom Aggregations?**
+    Custom aggregations allow you to count transactions that meet specific criteria over time.
+    They are NOT fraud detection rules - they create metrics that can be used in rules.
 
-    Perfect for velocity checks, spending pattern analysis, and behavioral anomaly detection.
+    **How it works:**
+    1. Define a **condition** (when to count)
+    2. Define **time periods** (1m, 2m, 3m, 4m, 5m)
+    3. System automatically counts matching transactions
+    4. Metrics can be used in fraud detection rules
+
+    **Examples:**
+
+    📊 **High-value transactions from specific countries:**
+    ```json
+    {
+        "name": "high_value_latam",
+        "value": "charge.amount > 1000 and charge.metadata.country in ['MX', 'BR', 'AR']",
+        "periods": [1, 2, 3, 4, 5]
+    }
+    ```
+    Creates metrics: `custom:high_value_latam:count:1m`, `custom:high_value_latam:count:2m`, etc.
+
+    💳 **Transactions with specific card types:**
+    ```json
+    {
+        "name": "debit_card_transactions",
+        "value": "charge.payment.card_type == 'debit'",
+        "periods": [1, 5]
+    }
+    ```
+
+    🌍 **Transactions from high-risk IPs:**
+    ```json
+    {
+        "name": "vpn_transactions",
+        "value": "charge.metadata.is_vpn == true or charge.metadata.is_proxy == true",
+        "periods": [1, 2, 3]
+    }
+    ```
+
+    🎯 **Using in fraud rules:**
+    After creating the aggregation, use it in a rule:
+    ```
+    custom:high_value_latam:count:1m > 10
+    ```
 
 > Body parameter
 
@@ -1406,7 +1443,7 @@ Create a new data aggregation rule for analytics and pattern detection.
 }
 ```
 
-<h3 id="create-analytics-aggregation-parameters">Parameters</h3>
+<h3 id="create-custom-aggregation-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -1418,24 +1455,30 @@ Create a new data aggregation rule for analytics and pattern detection.
 
 ```json
 {
-  "aggregation_id": "agg_123456",
-  "name": "Daily Transaction Volume",
-  "field": "amount",
-  "operation": "SUM",
-  "time_window": "24h",
-  "threshold": 10000,
-  "status": "active"
+  "id": "agg_123456",
+  "name": "high_value_latam",
+  "value": "charge.amount > 1000 and charge.metadata.country in ['MX', 'BR', 'AR']",
+  "periods": [
+    1,
+    2,
+    3,
+    4,
+    5
+  ],
+  "status": "ACTIVE",
+  "created_at": "2024-01-15T10:30:00Z",
+  "updated_at": "2024-01-15T10:30:00Z"
 }
 ```
 
-<h3 id="create-analytics-aggregation-responses">Responses</h3>
+<h3 id="create-custom-aggregation-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
-|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Aggregation created successfully|[AggregationResponse](#schemaaggregationresponse)|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Custom aggregation created successfully|[AggregationResponse](#schemaaggregationresponse)|
 |400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|Invalid aggregation configuration|None|
 |401|[Unauthorized](https://tools.ietf.org/html/rfc7235#section-3.1)|Invalid or missing API key|None|
-|409|[Conflict](https://tools.ietf.org/html/rfc7231#section-6.5.8)|Aggregation already exists|None|
+|409|[Conflict](https://tools.ietf.org/html/rfc7231#section-6.5.8)|Aggregation with this condition already exists|None|
 |422|[Unprocessable Entity](https://tools.ietf.org/html/rfc2518#section-10.3)|Validation error in request data|None|
 
 <aside class="warning">
@@ -1443,20 +1486,29 @@ To perform this operation, you must be authenticated by means of one of the foll
 HTTPBearer
 </aside>
 
-## List Analytics Aggregations
+## List Custom Aggregations
 
 <a id="opIdlist_aggregations_api_v1_aggregations__get"></a>
 
 `GET /api/v1/aggregations/`
 
-Retrieve a paginated list of all analytics aggregation rules for your company.
+Retrieve a paginated list of all custom aggregations for your company.
 
-<h3 id="list-analytics-aggregations-parameters">Parameters</h3>
+    Each aggregation includes:
+    - **Name** - Unique identifier for the aggregation
+    - **Condition (value)** - The condition that triggers counting
+    - **Periods** - Time windows being tracked (in minutes)
+    - **Status** - ACTIVE or INACTIVE
+    - **Timestamps** - Creation and last update times
+
+    Use the metrics from these aggregations in your fraud detection rules.
+
+<h3 id="list-custom-aggregations-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
 |current_page|query|integer|false|Page number (1-based)|
-|page_size|query|integer|false|Number of aggregations per page|
+|page_size|query|integer|false|Number of custom aggregations per page|
 
 > Example responses
 
@@ -1507,7 +1559,7 @@ Retrieve a paginated list of all analytics aggregation rules for your company.
 }
 ```
 
-<h3 id="list-analytics-aggregations-responses">Responses</h3>
+<h3 id="list-custom-aggregations-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
@@ -1519,13 +1571,22 @@ To perform this operation, you must be authenticated by means of one of the foll
 HTTPBearer
 </aside>
 
-## Update Analytics Aggregation
+## Update Custom Aggregation
 
 <a id="opIdupdate_aggregation_api_v1_aggregations__aggregation_id__put"></a>
 
 `PUT /api/v1/aggregations/{aggregation_id}`
 
-Update an existing analytics aggregation rule configuration, including thresholds, time windows, and monitoring parameters.
+Update an existing custom aggregation configuration.
+
+    You can modify:
+    - **Condition (value)** - Change when to count transactions
+    - **Time periods** - Add or remove monitoring periods
+    - **Name** - Update the aggregation identifier
+    - **Status** - Activate or deactivate
+
+    **Note:** Changes apply to new transactions only. Historical data processing (backfill)
+    will be available in a future version.
 
 > Body parameter
 
@@ -1541,7 +1602,7 @@ Update an existing analytics aggregation rule configuration, including threshold
 }
 ```
 
-<h3 id="update-analytics-aggregation-parameters">Parameters</h3>
+<h3 id="update-custom-aggregation-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -1562,15 +1623,20 @@ Update an existing analytics aggregation rule configuration, including threshold
   ],
   "created_at": "2019-08-24T14:15:22Z",
   "updated_at": "2019-08-24T14:15:22Z",
-  "db_model": {
+  "data": {
     "company_id": "2242269",
     "name": "rule1",
+    "periods": [
+      5,
+      30,
+      60
+    ],
     "value": "not (b == 2 and a == 2)"
   }
 }
 ```
 
-<h3 id="update-analytics-aggregation-responses">Responses</h3>
+<h3 id="update-custom-aggregation-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
@@ -1585,15 +1651,20 @@ To perform this operation, you must be authenticated by means of one of the foll
 HTTPBearer
 </aside>
 
-## Delete Analytics Aggregation
+## Delete Custom Aggregation
 
 <a id="opIddelete_aggregation_api_v1_aggregations__aggregation_id__delete"></a>
 
 `DELETE /api/v1/aggregations/{aggregation_id}`
 
-Permanently delete an analytics aggregation rule. This action cannot be undone.
+Permanently delete a custom aggregation.
 
-<h3 id="delete-analytics-aggregation-parameters">Parameters</h3>
+    ⚠️ **Important:**
+    - This action cannot be undone
+    - Metrics will stop being collected immediately
+    - Any fraud rules using this aggregation's metrics will fail
+
+<h3 id="delete-custom-aggregation-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -1617,7 +1688,7 @@ Permanently delete an analytics aggregation rule. This action cannot be undone.
 }
 ```
 
-<h3 id="delete-analytics-aggregation-responses">Responses</h3>
+<h3 id="delete-custom-aggregation-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
@@ -1631,15 +1702,15 @@ To perform this operation, you must be authenticated by means of one of the foll
 HTTPBearer
 </aside>
 
-## Get Analytics Aggregation
+## Get Custom Aggregation
 
 <a id="opIdget_aggregation_api_v1_aggregations__aggregation_id__get"></a>
 
 `GET /api/v1/aggregations/{aggregation_id}`
 
-Retrieve a specific analytics aggregation rule by its ID.
+Retrieve a specific custom aggregation by its ID, including its condition, periods, and current status.
 
-<h3 id="get-analytics-aggregation-parameters">Parameters</h3>
+<h3 id="get-custom-aggregation-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -1659,15 +1730,20 @@ Retrieve a specific analytics aggregation rule by its ID.
   ],
   "created_at": "2019-08-24T14:15:22Z",
   "updated_at": "2019-08-24T14:15:22Z",
-  "db_model": {
+  "data": {
     "company_id": "2242269",
     "name": "rule1",
+    "periods": [
+      5,
+      30,
+      60
+    ],
     "value": "not (b == 2 and a == 2)"
   }
 }
 ```
 
-<h3 id="get-analytics-aggregation-responses">Responses</h3>
+<h3 id="get-custom-aggregation-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
@@ -1681,21 +1757,20 @@ To perform this operation, you must be authenticated by means of one of the foll
 HTTPBearer
 </aside>
 
-## List Available Aggregation Fields
+## List Available Fields for Custom Aggregations
 
 <a id="opIdlist_fields_api_v1_aggregations_fields_get"></a>
 
 `GET /api/v1/aggregations/fields`
 
-Get the list of available fields that can be used in analytics aggregations.
+Get the list of available fields that can be used in custom aggregation conditions.
 
-    Returns all transaction and customer fields that can be aggregated including:
-    - **Transaction fields** - amount, currency, status, timestamps
-    - **Customer fields** - email, phone, location, device data
-    - **Payment fields** - card type, BIN, payment method
-    - **Metadata fields** - Custom fields from transaction metadata
-
-    Use these fields to build custom aggregation rules for pattern detection.
+    **Example conditions:**
+    ```
+    charge.amount > 5000
+    charge.payment.card_type == "credit"
+    charge.metadata.country in ["US", "CA"]
+    ```
 
 > Example responses
 
@@ -1707,7 +1782,7 @@ Get the list of available fields that can be used in analytics aggregations.
 }
 ```
 
-<h3 id="list-available-aggregation-fields-responses">Responses</h3>
+<h3 id="list-available-fields-for-custom-aggregations-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
@@ -1725,7 +1800,13 @@ HTTPBearer
 
 `GET /api/v1/aggregations/fields/description`
 
-Get detailed descriptions and data types for all available aggregation fields.
+Get detailed descriptions and data types for all fields available in custom aggregations.
+
+    Includes:
+    - Field name and path
+    - Data type (string, number, boolean, etc.)
+    - Description and usage examples
+    - Valid operators for the field type
 
 > Example responses
 
@@ -1755,7 +1836,10 @@ HTTPBearer
 
 `GET /api/v1/aggregations/charges/{charge_id}/events`
 
-Get analytics events triggered for a specific transaction charge.
+Get all aggregation events triggered for a specific transaction.
+
+    Shows which custom aggregations were incremented when this transaction was processed.
+    Useful for debugging and understanding which metrics were affected by a transaction.
 
 <h3 id="get-aggregation-events-parameters">Parameters</h3>
 
@@ -1796,7 +1880,9 @@ HTTPBearer
 
 `GET /api/v1/aggregations/charges/{charge_id}/logs`
 
-Get detailed logs of analytics events for a specific transaction charge.
+Get detailed execution logs for aggregation processing of a specific transaction.
+
+    Useful for debugging and monitoring transaction processing.
 
 <h3 id="get-aggregation-event-logs-parameters">Parameters</h3>
 
@@ -1823,7 +1909,7 @@ Get detailed logs of analytics events for a specific transaction charge.
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
-|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Detailed logs of aggregation events for the charge|[AggregationEventLogListResponse](#schemaaggregationeventloglistresponse)|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Detailed logs of aggregation processing for the charge|[AggregationEventLogListResponse](#schemaaggregationeventloglistresponse)|
 |422|[Unprocessable Entity](https://tools.ietf.org/html/rfc2518#section-10.3)|Validation Error|[HTTPValidationError](#schemahttpvalidationerror)|
 
 <aside class="warning">
@@ -4013,6 +4099,73 @@ AddCustomerResponse
 |»» **additionalProperties**|[string]|false|none|none|
 |ring_id|string|true|none|Fraud ring identifier|
 
+<h2 id="tocS_AggregationCustom">AggregationCustom</h2>
+<!-- backwards compatibility -->
+<a id="schemaaggregationcustom"></a>
+<a id="schema_AggregationCustom"></a>
+<a id="tocSaggregationcustom"></a>
+<a id="tocsaggregationcustom"></a>
+
+```json
+{
+  "company_id": "2242269",
+  "name": "rule1",
+  "periods": [
+    5,
+    30,
+    60
+  ],
+  "value": "not (b == 2 and a == 2)"
+}
+
+```
+
+AggregationCustom
+
+### Properties
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|_id|any|false|none|MongoDB document ObjectID|
+
+anyOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|string|false|none|none|
+
+or
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|null|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|aggregation_id|string|false|none|none|
+|value|string|false|none|none|
+|name|string|false|none|none|
+|periods|[integer]|false|none|none|
+|company_id|string|false|none|none|
+|status|[AggregationStatus](#schemaaggregationstatus)|false|none|Aggregation status enum.|
+|created_at|string(date-time)|false|none|none|
+|updated_at|string(date-time)|false|none|none|
+|processed_at|any|false|none|none|
+
+anyOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|string(date-time)|false|none|none|
+
+or
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|null|false|none|none|
+
 <h2 id="tocS_AggregationEventListResponse">AggregationEventListResponse</h2>
 <!-- backwards compatibility -->
 <a id="schemaaggregationeventlistresponse"></a>
@@ -4160,9 +4313,14 @@ AggregationRequest
   ],
   "created_at": "2019-08-24T14:15:22Z",
   "updated_at": "2019-08-24T14:15:22Z",
-  "db_model": {
+  "data": {
     "company_id": "2242269",
     "name": "rule1",
+    "periods": [
+      5,
+      30,
+      60
+    ],
     "value": "not (b == 2 and a == 2)"
   }
 }
@@ -4181,69 +4339,7 @@ AggregationResponse
 |periods|[integer]|true|none|none|
 |created_at|string(date-time)|true|none|none|
 |updated_at|string(date-time)|true|none|none|
-|db_model|[AggregationRules](#schemaaggregationrules)|true|none|Represents an aggregation rule in the antifraud system.|
-
-<h2 id="tocS_AggregationRules">AggregationRules</h2>
-<!-- backwards compatibility -->
-<a id="schemaaggregationrules"></a>
-<a id="schema_AggregationRules"></a>
-<a id="tocSaggregationrules"></a>
-<a id="tocsaggregationrules"></a>
-
-```json
-{
-  "company_id": "2242269",
-  "name": "rule1",
-  "value": "not (b == 2 and a == 2)"
-}
-
-```
-
-AggregationRules
-
-### Properties
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|_id|any|false|none|MongoDB document ObjectID|
-
-anyOf
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|string|false|none|none|
-
-or
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|null|false|none|none|
-
-continued
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|aggregation_id|string|false|none|none|
-|value|string|false|none|none|
-|name|string|false|none|none|
-|periods|[integer]|false|none|none|
-|company_id|string|false|none|none|
-|status|[AggregationStatus](#schemaaggregationstatus)|false|none|Aggregation status enum.|
-|created_at|string(date-time)|false|none|none|
-|updated_at|string(date-time)|false|none|none|
-|processed_at|any|false|none|none|
-
-anyOf
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|string(date-time)|false|none|none|
-
-or
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|null|false|none|none|
+|data|[AggregationCustom](#schemaaggregationcustom)|true|none|Represents an aggregation rule in the antifraud system.|
 
 <h2 id="tocS_AggregationStatus">AggregationStatus</h2>
 <!-- backwards compatibility -->
